@@ -32,6 +32,16 @@ Get your binaries from GitHub releases, precompiled for:
 
 <!-- TODO: put links -->
 
+## How to build
+
+```sh
+git clone https://github.com/fulldump/goz.git
+cd goz
+make build
+```
+
+Golang is required.
+
 ## Disclaimer and drawbacks
 
 Software released under The MIT License (MIT).
