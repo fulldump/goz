@@ -20,6 +20,8 @@ Decrypt all files inside a directory (recursive):
 goz --dir ./mydata/ --open
 ```
 
+To operate with a single file use `--file` instead of `--dir`.
+
 ## Download
 
 Get your binaries from GitHub releases, precompiled for:
@@ -27,4 +29,16 @@ Get your binaries from GitHub releases, precompiled for:
 * Windows
 * Linux
 * Mac
+
+<!-- TODO: put links -->
+
+## Disclaimer and drawbacks
+
+Goz does not guarantee file corruption free.
+
+It is designed to work with small files.
+
+File access is not concurrent.
+
+Goz does not ensure strong passwords.
 

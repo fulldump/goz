@@ -8,7 +8,10 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/fulldump/goconfig"
 	"golang.org/x/crypto/ssh/terminal"
@@ -16,6 +19,7 @@ import (
 
 type config struct {
 	File string
+	Dir  string
 	Open bool
 }
 
@@ -50,15 +54,36 @@ func main() {
 	password := readPassword()
 	key := GetMD5Hash(password)
 
-	err := gozFile(key, c.File, c.Open)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %s: %s\n", operation2string[c.Open], c.File, err.Error())
+	files := []string{}
+
+	if c.Dir == "" {
+		files = append(files, c.File)
+	} else {
+		filepath.Walk(c.Dir, func(path string, info fs.FileInfo, err error) error {
+			if info.IsDir() {
+				return nil
+			}
+			if strings.HasPrefix(info.Name(), ".") {
+				return nil
+			}
+
+			files = append(files, path)
+			return nil
+		})
 	}
+
+	for _, file := range files {
+		err := gozFile(key, file, c.Open)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s: %s\n", operation2string[c.Open], file, err.Error())
+		}
+	}
+
 }
 
 func gozFile(key []byte, filename string, open bool) (err error) {
 
-	f, err := os.Open(filename)
+	f, err := os.Open(filename) // TODO: open for exclusive access
 	if err != nil {
 		return fmt.Errorf("os.Open: %w", err)
 	}
