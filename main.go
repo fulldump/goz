@@ -17,10 +17,13 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+var VERSION = "dev"
+
 type config struct {
-	File string
-	Dir  string
-	Open bool
+	File    string
+	Dir     string
+	Open    bool
+	Version bool
 }
 
 // Source: https://go.dev/play/p/l-9IP1mrhA
@@ -50,6 +53,11 @@ func main() {
 
 	c := config{}
 	goconfig.Read(&c)
+
+	if c.Version {
+		fmt.Println("Version:", VERSION)
+		return
+	}
 
 	// todo: validate config
 
