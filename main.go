@@ -23,6 +23,7 @@ type config struct {
 	Open bool
 }
 
+// Source: https://go.dev/play/p/l-9IP1mrhA
 func readPassword() []byte {
 	fmt.Fprint(os.Stderr, "Enter password: ")
 	password, err := terminal.ReadPassword(0)
@@ -33,6 +34,7 @@ func readPassword() []byte {
 	return password
 }
 
+// Source: https://gist.github.com/sergiotapia/8263278
 func GetMD5Hash(text []byte) []byte {
 	hasher := md5.New()
 	hasher.Write(text)

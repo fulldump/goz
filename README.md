@@ -34,11 +34,20 @@ Get your binaries from GitHub releases, precompiled for:
 
 ## Disclaimer and drawbacks
 
+Software released under The MIT License (MIT).
+
 Goz does not guarantee file corruption free.
 
-It is designed to work with small files.
+It is designed to work with small files (does not support streaming).
 
 File access is not concurrent.
 
 Goz does not ensure strong passwords.
+
+## Thanks
+
+This code is 100% based on these articles:
+
+* https://levelup.gitconnected.com/a-short-guide-to-encryption-using-go-da97c928259f
+* https://medium.com/@mertkimyonsen/encrypt-a-file-using-go-f1fe3bc7c635
 
