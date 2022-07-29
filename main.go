@@ -35,6 +35,11 @@ func GetMD5Hash(text []byte) []byte {
 	return []byte(hex.EncodeToString(hasher.Sum(nil)))
 }
 
+var operation2string = map[bool]string{
+	true:  "decrypt",
+	false: "encrypt",
+}
+
 func main() {
 
 	c := config{}
@@ -45,83 +50,86 @@ func main() {
 	password := readPassword()
 	key := GetMD5Hash(password)
 
-	// content, err := os.ReadFile(c.File)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	gozFile(key, c.File, c.Open)
-
+	err := gozFile(key, c.File, c.Open)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s: %s: %s\n", operation2string[c.Open], c.File, err.Error())
+	}
 }
 
-func gozFile(key []byte, filename string, open bool) {
+func gozFile(key []byte, filename string, open bool) (err error) {
 
 	f, err := os.Open(filename)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("os.Open: %w", err)
 	}
 
 	s, err := f.Stat()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("f.Stat: %w", err)
 	}
 
 	content, err := io.ReadAll(f)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("io.ReadAll: %w", err)
 	}
+	f.Close() // TODO: handle err
 
 	var transformed []byte
 	if open {
-		transformed = decrypt(key, content)
+		transformed, err = decrypt(key, content)
 	} else {
-		transformed = encrypt(key, content)
+		transformed, err = encrypt(key, content)
+	}
+	if err != nil {
+		return fmt.Errorf("f.Stat: %w", err)
 	}
 
 	err = os.WriteFile(filename, transformed, s.Mode())
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("os.WriteFile: %w", err)
 	}
+
+	return
 }
 
-func encrypt(key, plaintext []byte) (ciphertext []byte) {
+func encrypt(key, plaintext []byte) (ciphertext []byte, err error) {
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("aes.NewCipher: %w", err)
 	}
 
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("cipher.NewGCM: %w", err)
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err)
+		return nil, fmt.Errorf("nonce: %w", err)
 	}
 
-	return gcm.Seal(nonce, nonce, plaintext, nil)
+	return gcm.Seal(nonce, nonce, plaintext, nil), nil
 }
 
-func decrypt(key, ciphertext []byte) (plaintext []byte) {
+func decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("aes.NewCipher: %w", err)
 	}
 
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("cipher.NewGCM: %w", err)
 	}
 
 	nonce := ciphertext[:gcm.NonceSize()]
 	ciphertext = ciphertext[gcm.NonceSize():]
 	plaintext, err = gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("gcm.Open: %w", err)
 	}
 
-	return plaintext
+	return
 }
