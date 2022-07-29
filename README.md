@@ -24,13 +24,11 @@ To operate with a single file use `--file` instead of `--dir`.
 
 ## Download
 
-Get your binaries from GitHub releases, precompiled for:
+Get your binaries from [GitHub releases](https://github.com/fulldump/goz/releases), precompiled for:
 
 * Windows
 * Linux
 * Mac
-
-<!-- TODO: put links -->
 
 ## How to build
 
