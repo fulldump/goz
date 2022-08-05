@@ -3,9 +3,8 @@ package main
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/md5"
 	"crypto/rand"
-	"encoding/hex"
+	"crypto/sha1"
 	"fmt"
 	"io"
 	"io/fs"
@@ -14,10 +13,19 @@ import (
 	"strings"
 
 	"github.com/fulldump/goconfig"
+	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 var VERSION = "dev"
+
+// Changing these values will make this tool backwards incompatible (unsuitable
+// for decrypting files already encrypted with previous versions)
+var (
+	salt = []byte("848405a0-14df-11ed-9d64-23f5c6c8bd9c")
+	hash = sha1.New
+	iter = 4096
+)
 
 type config struct {
 	File    string
@@ -35,13 +43,6 @@ func readPassword(prompt string) []byte {
 		panic(err)
 	}
 	return password
-}
-
-// Source: https://gist.github.com/sergiotapia/8263278
-func GetMD5Hash(text []byte) []byte {
-	hasher := md5.New()
-	hasher.Write(text)
-	return []byte(hex.EncodeToString(hasher.Sum(nil)))
 }
 
 var operation2string = map[bool]string{
@@ -69,7 +70,10 @@ func main() {
 			os.Exit(7)
 		}
 	}
-	key := GetMD5Hash(password)
+
+	// Using Pasword Based Key Derivation Function to get a key based on password
+	// Thanks to @psanford (github id) Peter Stanford for this: https://gophers.slack.com/archives/C02A3DRK6/p1659185759603659
+	key := pbkdf2.Key(password, salt, iter, 32, hash)
 
 	files := []string{}
 

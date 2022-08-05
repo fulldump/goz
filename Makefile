@@ -27,4 +27,4 @@ release: clean
 
 .PHONY: clean
 clean:
-	rm bin/*
+	rm -f bin/*
