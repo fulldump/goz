@@ -1,6 +1,6 @@
 # GOZ
 
-Goz is a tool to cypher/decyper files in place.
+Goz is a tool to encrypt/decrypt files in place.
 
 AES256 is the algorithm election for this implementation.
 
