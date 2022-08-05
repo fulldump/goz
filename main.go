@@ -27,8 +27,8 @@ type config struct {
 }
 
 // Source: https://go.dev/play/p/l-9IP1mrhA
-func readPassword() []byte {
-	fmt.Fprint(os.Stderr, "Enter password: ")
+func readPassword(prompt string) []byte {
+	fmt.Fprint(os.Stderr, prompt)
 	password, err := terminal.ReadPassword(0)
 	fmt.Fprintln(os.Stderr, "")
 	if err != nil {
@@ -61,7 +61,14 @@ func main() {
 
 	// todo: validate config
 
-	password := readPassword()
+	password := readPassword("Enter password: ")
+	if !c.Open {
+		confirm := readPassword("Confirm password: ")
+		if string(confirm) != string(password) {
+			fmt.Fprintln(os.Stderr, "Password does not match")
+			os.Exit(7)
+		}
+	}
 	key := GetMD5Hash(password)
 
 	files := []string{}
