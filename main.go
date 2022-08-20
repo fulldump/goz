@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -60,7 +61,10 @@ func main() {
 		return
 	}
 
-	// todo: validate config
+	if err := validate(c); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		return
+	}
 
 	password := readPassword("Enter password: ")
 	if !c.Open {
@@ -100,6 +104,14 @@ func main() {
 		}
 	}
 
+}
+
+func validate(c config) error {
+	// todo: improve validation
+	if c.File == "" && c.Dir == "" {
+		return errors.New(`target file or directory not specified. Execute "goz -help"`)
+	}
+	return nil
 }
 
 func gozFile(key []byte, filename string, open bool) (err error) {
